@@ -1,0 +1,15 @@
+indentation: 2
+column-limit: 120
+function-arrows: leading
+comma-style: leading
+import-export-style: leading
+indent-wheres: true
+record-brace-space: false
+haddock-style: single-line
+haddock-style-module: single-line
+single-constraint-parens: never
+single-deriving-parens: never
+sort-constraints: true
+sort-derived-classes: true
+sort-deriving-clauses: true
+trailing-section-operators: false

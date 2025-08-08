@@ -1,0 +1,35 @@
+cabal-version:      3.0
+name:               optimum-slice
+version:            0.1.0.0
+author:             Jacob Boxerman
+build-type:         Simple
+
+common common-options
+  default-language:   GHC2021
+  ghc-options:        -Wall -Wunused-packages
+  
+library
+  import:             common-options
+  hs-source-dirs:     src
+  exposed-modules:    OptimumSlice
+  build-depends:      base
+                     , vector
+  
+executable optimum-slice
+  import:             common-options
+  main-is:            Main.hs
+  hs-source-dirs:     exe
+  build-depends:      base
+                     , optimum-slice
+                     , vector
+
+test-suite optimum-slice-test
+  import:             common-options
+  type:               exitcode-stdio-1.0
+  main-is:            Test.hs
+  hs-source-dirs:     test
+  build-depends:      base
+                     , optimum-slice
+                     , vector
+                     , tasty
+                     , tasty-hunit
