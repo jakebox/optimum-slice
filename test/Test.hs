@@ -16,14 +16,14 @@ tests = testGroup "Tests" [unitTests, typeTests]
 typeTests :: TestTree
 typeTests = testGroup "Type tests"
   [ testCase "Pie equality" $
-      (Pie (HalfSection (Section "pepperoni") (Section "mushroom")) (Section "cheese"))
+      Pie (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom")) (Section $ V.singleton "cheese")
         ==
-        (Pie (HalfSection (Section "mushroom") (Section "pepperoni")) (Section "cheese"))
+        Pie (HalfSection (Section $ V.singleton "mushroom") (Section $ V.singleton "pepperoni")) (Section $ V.singleton "cheese")
         @?= True
   , testCase "Pie inequality" $
-      (Pie (HalfSection (Section "pepperoni") (Section "mushroom")) (Section "cheese"))
+      Pie (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom")) (Section $ V.singleton "cheese")
         ==
-        (Pie (HalfSection (Section "pepperoni") (Section "mushroom ")) (Section "pepperoni"))
+        Pie (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom ")) (Section $ V.singleton "pepperoni")
         @?= False
   ]
 
@@ -32,28 +32,28 @@ unitTests :: TestTree
 unitTests = testGroup "Unit tests"
   [ testCase "scoreTopping favorite" $
       scoreTopping testPref "pepperoni" @?= 10
-      
+
   , testCase "scoreTopping disliked" $
       scoreTopping testPref "pineapple" @?= (-10)
-      
+
   , testCase "scoreTopping restricted" $
       scoreTopping testPref "seafood" @?= (-100)
-      
+
   , testCase "scoreTopping neutral" $
       scoreTopping testPref "onion" @?= 5
-      
+
   , testCase "scoreHalf with single leaf" $
-      scoreHalf testPref (Section "pepperoni") @?= 10
-      
+      scoreHalf testPref (Section $ V.singleton "pepperoni") @?= 10
+
   , testCase "scoreHalf with multiple leaves" $
-      scoreHalf testPref (HalfSection (Section "pepperoni") (Section "mushroom")) @?= 20
-      
+      scoreHalf testPref (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom")) @?= 20
+
   , testCase "scoreHalf with mixed ratings" $
-      scoreHalf testPref (HalfSection (Section "pepperoni") (Section "pineapple")) @?= 0
-      
+      scoreHalf testPref (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "pineapple")) @?= 0
+
   , testCase "scorePie with good pie" $
       scorePie testPref goodPie @?= 20
-      
+
   , testCase "scorePie with bad pie" $
       scorePie testPref badPie @?= (-20)
 
@@ -77,11 +77,11 @@ testPref2 = Preference
   }
 
 goodPie :: Pie
-goodPie = Pie 
-  (HalfSection (Section "pepperoni") (Section "mushroom"))
-  (Section "cheese")
+goodPie = Pie
+  (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom"))
+  (Section $ V.singleton "cheese")
 
 badPie :: Pie
 badPie = Pie
-  (Section "seafood")
-  (HalfSection (Section "pineapple") (Section "olive"))
+  (Section $ V.singleton "seafood")
+  (HalfSection (Section $ V.singleton "pineapple") (Section $ V.singleton "olive"))
