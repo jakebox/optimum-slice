@@ -10,7 +10,59 @@ main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree
-tests = testGroup "Tests" [unitTests, typeTests]
+tests = testGroup "Tests" [unitTests, typeTests, neighborTests]
+
+neighborTests :: TestTree
+neighborTests = testGroup "Neighbor tests"
+  [ testCase "remove a topping" $
+      toppingRemove
+        (HalfSection (Section $ V.singleton "pepperoni") (Section $ V.singleton "mushroom"))
+        "pepperoni"
+      @?= HalfSection (Section $ V.singleton "cheese") (Section $ V.singleton "mushroom")
+  , testCase "remove another topping" $
+      toppingRemove
+        (HalfSection (HalfSection (Section $ V.singleton "mushroom") (Section $ V.singleton "onion")) (Section $ V.singleton "mushroom"))
+        "mushroom"
+      @?= HalfSection (HalfSection (Section $ V.singleton "cheese") (Section $ V.singleton "onion")) (Section $ V.singleton "cheese")
+  , testCase "replace a topping" $
+      toppingReplace
+        (HalfSection (HalfSection (Section $ V.singleton "mushroom") (Section $ V.singleton "onion")) (Section $ V.singleton "mushroom"))
+        "mushroom" "peppers"
+      @?= HalfSection (HalfSection (Section $ V.singleton "peppers") (Section $ V.singleton "onion")) (Section $ V.singleton "peppers")
+  , testCase "add topping to single section" $
+      toppingAddAllSections (Section $ V.singleton "cheese") "pepperoni"
+      @?= [Section $ V.fromList ["cheese", "pepperoni"]]
+  , testCase "add topping to full section" $
+      toppingAddAllSections (Section $ V.fromList ["cheese", "pepperoni", "mushroom"]) "onion"
+      @?= []
+  , testCase "add topping to half section" $
+      toppingAddAllSections 
+        (HalfSection (Section $ V.singleton "cheese") (Section $ V.singleton "pepperoni")) 
+        "mushroom"
+      @?= [ HalfSection (Section $ V.fromList ["cheese", "mushroom"]) (Section $ V.singleton "pepperoni")
+          , HalfSection (Section $ V.singleton "cheese") (Section $ V.fromList ["pepperoni", "mushroom"])
+          ]
+  , testCase "add topping to nested half section" $
+      toppingAddAllSections
+        (HalfSection (HalfSection (Section $ V.singleton "cheese") (Section $ V.singleton "pepperoni")) (Section $ V.singleton "mushroom"))
+        "onion"
+      @?= [ HalfSection (HalfSection (Section $ V.fromList ["cheese", "onion"]) (Section $ V.singleton "pepperoni")) (Section $ V.singleton "mushroom")
+          , HalfSection (HalfSection (Section $ V.singleton "cheese") (Section $ V.fromList ["pepperoni", "onion"])) (Section $ V.singleton "mushroom")
+          , HalfSection (HalfSection (Section $ V.singleton "cheese") (Section $ V.singleton "pepperoni")) (Section $ V.fromList ["mushroom", "onion"])
+          ]
+  , testCase "generateNeighbors basic" $
+      length (generateNeighbors simplePie (V.fromList ["pepperoni", "mushroom"])) @?= 4
+  , testCase "generateNeighbors add neighbors" $
+      take 4 (generateNeighbors simplePie (V.fromList ["pepperoni", "mushroom"]))
+      @?= [ Pie (Section $ V.fromList ["cheese", "pepperoni"]) (Section $ V.singleton "cheese")
+          , Pie (Section $ V.singleton "cheese") (Section $ V.fromList ["cheese", "pepperoni"])
+          , Pie (Section $ V.fromList ["cheese", "mushroom"]) (Section $ V.singleton "cheese")
+          , Pie (Section $ V.singleton "cheese") (Section $ V.fromList ["cheese", "mushroom"])
+          ]
+  ]
+
+simplePie :: Pie
+simplePie = Pie (Section $ V.singleton "cheese") (Section $ V.singleton "cheese")
 
 -- -- Ensure types make sense
 typeTests :: TestTree
@@ -59,7 +111,16 @@ unitTests = testGroup "Unit tests"
 
   , testCase "Topping domain" $
       toppingDomain [testPref, testPref2] @?= V.fromList ["pepperoni", "mushroom", "onion", "green pepper"]
+  
+  , testCase "Topping domain removes duplicates" $
+      toppingDomain [testPref, testPrefDuplicate] @?= V.fromList ["pepperoni", "mushroom"]
+  
+  , testCase "optimumSlice basic test" $
+      scorePieGroup [testPref] (optimumSlice [testPref]) >= scorePieGroup [testPref] startPie @?= True
   ]
+
+startPie :: Pie
+startPie = Pie (Section $ V.singleton "cheese") (Section $ V.singleton "cheese")
 
 -- Test data
 testPref :: Preference
@@ -73,6 +134,13 @@ testPref2 :: Preference
 testPref2 = Preference
   { favoriteToppings = V.fromList ["onion", "green pepper"]
   , dislikedToppings = V.fromList ["mushroom"]
+  , restrictedToppings = V.fromList []
+  }
+
+testPrefDuplicate :: Preference
+testPrefDuplicate = Preference
+  { favoriteToppings = V.fromList ["pepperoni", "mushroom"]
+  , dislikedToppings = V.fromList []
   , restrictedToppings = V.fromList []
   }
 

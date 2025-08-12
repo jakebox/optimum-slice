@@ -3,23 +3,39 @@ module Main where
 import OptimumSlice
 import Data.Vector qualified as V
 
-samplePreference :: Preference
-samplePreference = Preference
-  { favoriteToppings = V.fromList ["pepperoni", "mushroom"]
-  , dislikedToppings = V.fromList ["pineapple", "olive"]
-  , restrictedToppings = V.fromList ["seafood"]
+-- Example group preferences
+person1 :: Preference
+person1 = Preference
+  { favoriteToppings = V.fromList ["onion"]
+  , dislikedToppings = V.fromList ["olive", "pepperoni", "sausage"]
+  , restrictedToppings = V.fromList []
   }
 
-samplePie :: Pie
-samplePie = Pie (HalfSection (Leaf "pepperoni") (Leaf "mushroom")) 
-              (HalfSection (Leaf "cheese") (Leaf "pineapple"))
+person2 :: Preference
+person2 = Preference
+  { favoriteToppings = V.fromList ["green pepper", "mushroom", "olive", "pepperoni"]
+  , dislikedToppings = V.fromList ["pepperoni"]
+  , restrictedToppings = V.fromList []
+  }
 
-test :: IO ()
-test = do
-  putStrLn "Testing the scorer with sample data:"
-  putStrLn $ "Sample preference: " ++ show samplePreference
-  putStrLn $ "Sample pie: " ++ show samplePie
-  putStrLn $ "Score: " ++ show (scorePie samplePreference samplePie)
+person3 :: Preference
+person3 = Preference
+  { favoriteToppings = V.fromList ["pepperoni", "sausage"]
+  , dislikedToppings = V.fromList ["mushroom", "onion"]
+  , restrictedToppings = V.fromList ["pineapple"]
+  }
+
+groupPrefs :: [Preference]
+groupPrefs = [person1, person2, person3]
 
 main :: IO ()
-main = test -- Replace this with: optimumSlice =<< optimumSliceCli
+main = do
+  putStrLn "Finding optimal pizza for the group..."
+  putStrLn $ "Group preferences: " ++ show groupPrefs
+  putStrLn ""
+  
+  let optimalPie = optimumSlice groupPrefs
+      totalScore = scorePieGroup groupPrefs optimalPie
+      
+  putStrLn $ "Optimal pizza: " ++ show optimalPie
+  putStrLn $ "Total group score: " ++ show totalScore
