@@ -13,6 +13,7 @@ library
   hs-source-dirs:     src
   exposed-modules:    OptimumSlice
   build-depends:      base
+                     , containers
                      , vector
   
 executable optimum-slice
@@ -20,8 +21,10 @@ executable optimum-slice
   main-is:            Main.hs
   hs-source-dirs:     exe
   build-depends:      base
+                     , containers
                      , optimum-slice
                      , vector
+                     , optparse-applicative
 
 test-suite optimum-slice-test
   import:             common-options
@@ -29,6 +32,7 @@ test-suite optimum-slice-test
   main-is:            Test.hs
   hs-source-dirs:     test
   build-depends:      base
+                     , containers
                      , optimum-slice
                      , vector
                      , tasty
